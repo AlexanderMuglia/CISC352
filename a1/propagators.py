@@ -1,16 +1,13 @@
 # =============================
-# Student Names:
-# Group ID:
-# Date:
+# Student Names: Alexander Muglia
+# Group ID: (A1) 2
+# Date: 21/01/2024
 # =============================
 # CISC 352 - W23
 # propagators.py
 # desc:
 #
 
-
-#Look for #IMPLEMENT tags in this file. These tags indicate what has
-#to be implemented to complete problem solution.
 
 '''This file will contain different constraint propagators to be used within
    bt_search.
@@ -71,6 +68,8 @@
          for gac we initialize the GAC queue with all constraints containing V.
    '''
 
+from collections import defaultdict
+
 def prop_BT(csp, newVar=None):
     '''Do plain backtracking propagation. That is, do no
     propagation at all. Just check fully instantiated constraints'''
@@ -126,9 +125,65 @@ def prop_FC(csp, newVar=None):
     return status, pruned
 
 
+# not working yet
 def prop_GAC(csp, newVar=None):
     '''Do GAC propagation. If newVar is None we do initial GAC enforce
        processing all constraints. Otherwise we do GAC enforce with
        constraints containing newVar on GAC Queue'''
-    #IMPLEMENT
-    pass
+
+    pruned = []
+
+    #print("CSP:")
+    #ls = [(x.name, x.get_scope())  for x in csp.get_all_cons()]
+    #for x in ls:
+    #    print(x)
+    allcons = csp.get_all_cons()
+    queue = []
+    # used to quickly find constraints with a certain variable on the right
+    rightside_lookup = defaultdict(list)
+
+    if newVar is None:
+        queue = allcons[:]
+    else:
+        # only want arcs containging newvar
+        queue = csp.get_cons_with_var(newVar)
+
+    for con in allcons:
+        rlist = con.get_scope()[1:]
+        for rightvar in rlist:
+            rightside_lookup[rightvar].append(con)
+
+    while queue:
+        c = queue.pop()
+        print(c.sat_tuples)
+        scope = c.get_scope()
+        left = scope[0]
+        rlist = scope[1:]
+
+        # keep track if we had to add left's neighbours to the queue.
+        # Only want to do this once per constraint max.
+        added_to_queue = False
+
+        for x in left.cur_domain():
+            print(left.name, x)
+            satisfiable = False
+            for right in rlist:
+                for y in right.cur_domain():
+                    print(left.name, x, right.name, y)
+                    if c.check_tuple((x, y)):
+                        satisfiable = True
+                        break
+
+                if not satisfiable:
+                    # if we remove all values from a variable's domain, we hit a dead end
+                    if left.cur_domain_size() == 1:
+                        return False, pruned
+
+                    pruned.append((left, x))
+                    left.prune_value(x)
+                    if not added_to_queue:
+                        queue = rightside_lookup[right] + queue
+                        added_to_queue = True
+
+    return True, pruned
+

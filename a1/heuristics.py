@@ -1,7 +1,7 @@
 # =============================
-# Student Names:
-# Group ID:
-# Date:
+# Student Names: Alexander Muglia
+# Group ID: (A1) 2
+# Date: 21/01/2024
 # =============================
 # CISC 352 - W23
 # heuristics.py
@@ -9,8 +9,6 @@
 #
 
 
-#Look for #IMPLEMENT tags in this file. These tags indicate what has
-#to be implemented to complete problem solution.
 
 '''This file will contain different constraint propagators to be used within
    the propagators
@@ -29,10 +27,34 @@ var_ordering == a function with the following template
 
 def ord_dh(csp):
     ''' return variables according to the Degree Heuristic '''
-    # IMPLEMENT
-    pass
+    vars = csp.get_all_unasgn_vars()
+
+    ret = None
+    dh = -1
+
+    for var in vars:
+        cur_dh = len(csp.get_cons_with_var(var))
+        if cur_dh > dh:
+            dh = cur_dh
+            ret = var
+
+    return ret
 
 def ord_mrv(csp):
     ''' return variable according to the Minimum Remaining Values heuristic '''
-    # IMPLEMENT
-    pass
+    vars = csp.get_all_unasgn_vars()
+
+    if len(vars) == 0:
+        return None
+
+    ret = vars[0]
+    mrv = ret.cur_domain_size()
+
+    for var in vars:
+        var_domain_size = var.cur_domain_size()
+        if var_domain_size < mrv:
+            mrv = var_domain_size
+            ret = var
+
+    return ret
+
