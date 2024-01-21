@@ -78,6 +78,8 @@ def prop_BT(csp, newVar=None):
     if not newVar:
         return True, []
     for c in csp.get_cons_with_var(newVar):
+        # code to check if a particular assignment of all vars in a constraint satisfy the constraint
+        # --------------------------------
         if c.get_n_unasgn() == 0:
             vals = []
             vars = c.get_scope()
@@ -85,14 +87,47 @@ def prop_BT(csp, newVar=None):
                 vals.append(var.get_assigned_value())
             if not c.check_tuple(vals):
                 return False, []
+        # --------------------------------
     return True, []
 
 def prop_FC(csp, newVar=None):
     '''Do forward checking. That is check constraints with
        only one uninstantiated variable. Remember to keep
        track of all pruned variable,value pairs and return '''
-    #IMPLEMENT
-    pass
+
+    ret_tf = False
+    ret_rm = []
+
+    cons = []
+    if newVar is None:
+        # nothing assigned yet, FC all unary cons
+        cons = csp.get_all_nary_cons(1)
+    else:
+        # get all cons with 1 unassigned var
+        cons = [x for x in csp.get_cons_with_var(newVar) if x.get_n_unasgn() == 1]
+
+    for c in cons:
+        var = c.get_unasgn_vars()[0]
+        for pot in var.cur_domain():
+            if c.check_var_val(var, pot):
+                # there is at least one assignment that works
+                ret_tf = True
+            else:
+                ret_rm.append((var, pot))
+                var.prune_value(pot)
+
+    # if every variable is assigned, g2g
+    if len(csp.get_all_unasgn_vars()) == 0:
+        ret_tf = True
+    # if no constraits have only one unassigned variable, g2g
+    if len(cons) == 0:
+        ret_tf = True
+
+    return ret_tf, ret_rm
+
+
+    # double check this
+    return True, []
 
 
 def prop_GAC(csp, newVar=None):

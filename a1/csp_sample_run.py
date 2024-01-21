@@ -218,10 +218,10 @@ trace = False
 print("Plain Backtracking on Colouring Australia")
 solve_graph_color('BT', trace)
 print("=========================================")
-# trace = False
-# print("Forward Checking on Colouring Australia")
-# solve_graph_color('FC', trace)
-# print("=========================================")
+trace = False
+print("Forward Checking on Colouring Australia")
+solve_graph_color('FC', trace)
+print("=========================================")
 
 
 # ================
