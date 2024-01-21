@@ -95,8 +95,8 @@ def prop_FC(csp, newVar=None):
        only one uninstantiated variable. Remember to keep
        track of all pruned variable,value pairs and return '''
 
-    ret_tf = False
-    ret_rm = []
+    status = False
+    pruned = []
 
     cons = []
     if newVar is None:
@@ -111,23 +111,19 @@ def prop_FC(csp, newVar=None):
         for pot in var.cur_domain():
             if c.check_var_val(var, pot):
                 # there is at least one assignment that works
-                ret_tf = True
+                status = True
             else:
-                ret_rm.append((var, pot))
+                pruned.append((var, pot))
                 var.prune_value(pot)
 
     # if every variable is assigned, g2g
     if len(csp.get_all_unasgn_vars()) == 0:
-        ret_tf = True
+        status = True
     # if no constraits have only one unassigned variable, g2g
     if len(cons) == 0:
-        ret_tf = True
+        status = True
 
-    return ret_tf, ret_rm
-
-
-    # double check this
-    return True, []
+    return status, pruned
 
 
 def prop_GAC(csp, newVar=None):
