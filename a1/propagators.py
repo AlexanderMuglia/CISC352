@@ -1,5 +1,5 @@
 # =============================
-# Student Names: Alexander Muglia
+# Student Names: Alexander Muglia, Jax Hodgkinson
 # Group ID: (A1) 2
 # Date: 21/01/2024
 # =============================
@@ -70,6 +70,7 @@
 
 from collections import defaultdict
 
+
 def prop_BT(csp, newVar=None):
     '''Do plain backtracking propagation. That is, do no
     propagation at all. Just check fully instantiated constraints'''
@@ -89,6 +90,7 @@ def prop_BT(csp, newVar=None):
         # --------------------------------
     return True, []
 
+
 def prop_FC(csp, newVar=None):
     '''Do forward checking. That is check constraints with
        only one uninstantiated variable. Remember to keep
@@ -103,7 +105,8 @@ def prop_FC(csp, newVar=None):
         cons = csp.get_all_nary_cons(1)
     else:
         # get all cons with 1 unassigned var
-        cons = [x for x in csp.get_cons_with_var(newVar) if x.get_n_unasgn() == 1]
+        cons = [x for x in csp.get_cons_with_var(
+            newVar) if x.get_n_unasgn() == 1]
 
     for c in cons:
         var = c.get_unasgn_vars()[0]
@@ -125,65 +128,58 @@ def prop_FC(csp, newVar=None):
     return status, pruned
 
 
-# not working yet
 def prop_GAC(csp, newVar=None):
     '''Do GAC propagation. If newVar is None we do initial GAC enforce
        processing all constraints. Otherwise we do GAC enforce with
        constraints containing newVar on GAC Queue'''
 
+    status = False
     pruned = []
 
-    #print("CSP:")
-    #ls = [(x.name, x.get_scope())  for x in csp.get_all_cons()]
-    #for x in ls:
-    #    print(x)
-    allcons = csp.get_all_cons()
-    queue = []
-    # used to quickly find constraints with a certain variable on the right
-    rightside_lookup = defaultdict(list)
-
+    cons = []
     if newVar is None:
-        queue = allcons[:]
+        # Process all constraints
+        cons = csp.get_all_cons()
     else:
-        # only want arcs containging newvar
-        queue = csp.get_cons_with_var(newVar)
+        # Process constraints involving newVar
+        cons = [x for x in csp.get_cons_with_var(
+            newVar) if x.get_n_unasgn() > 0]
 
-    for con in allcons:
-        rlist = con.get_scope()[1:]
-        for rightvar in rlist:
-            rightside_lookup[rightvar].append(con)
+    def dfs(c, partial_tuple, vars_queue) -> bool:
+        # DFS search to find at least 1 solution
+        # Recursively assembles a tuple and then checks if valid
 
-    while queue:
-        c = queue.pop()
-        print(c.sat_tuples)
-        scope = c.get_scope()
-        left = scope[0]
-        rlist = scope[1:]
+        # if tuple complete, check if valid
+        if not vars_queue:
+            return c.check_tuple(partial_tuple)
 
-        # keep track if we had to add left's neighbours to the queue.
-        # Only want to do this once per constraint max.
-        added_to_queue = False
+        # Keep assembling tuple
+        for val in vars_queue[0].cur_domain():
+            # If false, keep looking
+            if dfs(c, partial_tuple + [val], vars_queue[1:]):
+                return True
+        return False
 
-        for x in left.cur_domain():
-            print(left.name, x)
-            satisfiable = False
-            for right in rlist:
-                for y in right.cur_domain():
-                    print(left.name, x, right.name, y)
-                    if c.check_tuple((x, y)):
-                        satisfiable = True
-                        break
+    for c in cons:
+        for v in c.get_unasgn_vars():
+            for x in v.cur_domain():
+                v.assign(x)
 
-                if not satisfiable:
-                    # if we remove all values from a variable's domain, we hit a dead end
-                    if left.cur_domain_size() == 1:
-                        return False, pruned
+                res = dfs(c, [], c.get_scope())
 
-                    pruned.append((left, x))
-                    left.prune_value(x)
-                    if not added_to_queue:
-                        queue = rightside_lookup[right] + queue
-                        added_to_queue = True
+                v.unassign()
 
-    return True, pruned
+                if not res:
+                    pruned.append((v, x))
+                    v.prune_value(x)
+                else:
+                    status = True
 
+    # if every variable is assigned, g2g
+    if len(csp.get_all_unasgn_vars()) == 0:
+        status = True
+    # if no cons that means every constraint with current var has a full assignment, g2g
+    if len(cons) == 0:
+        status = True
+
+    return status, pruned
