@@ -5,7 +5,7 @@
 # =============================
 # CISC 352 - W23
 # heuristics.py
-# desc:
+# desc: Implementation of the degree heuristic and minimum remaining value heuristic
 #
 
 

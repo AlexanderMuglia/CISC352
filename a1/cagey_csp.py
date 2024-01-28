@@ -1,11 +1,11 @@
 # =============================
-# Student Names: Alexander Muglia, Jax Hodgkinson
+# Student Names: Alexander Muglia
 # Group ID: (A1) 2
 # Date: 21/01/2024
 # =============================
 # CISC 352 - W23
 # cagey_csp.py
-# desc:
+# desc: builds CSP models based on the below specifications
 #
 
 #Look for #IMPLEMENT tags in this file.

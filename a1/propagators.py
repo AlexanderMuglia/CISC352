@@ -5,7 +5,7 @@
 # =============================
 # CISC 352 - W23
 # propagators.py
-# desc:
+# desc: Implementation of the BT, FC, and GAC propagation methods described below.
 #
 
 
