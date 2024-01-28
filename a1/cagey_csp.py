@@ -1,7 +1,7 @@
 # =============================
-# Student Names:
-# Group ID:
-# Date:
+# Student Names: Alexander Muglia, Jax Hodgkinson
+# Group ID: (A1) 2
+# Date: 21/01/2024
 # =============================
 # CISC 352 - W23
 # cagey_csp.py
