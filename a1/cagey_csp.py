@@ -85,6 +85,15 @@ An example of a 3x3 puzzle would be defined as:
 
 from cspbase import *
 from itertools import product
+from itertools import permutations
+
+def build_var_array(dom):
+    var_array = []
+    for i in dom:
+        for j in dom:
+            var = Variable(f"Cell({i},{j})", dom)
+            var_array.append(var)
+    return var_array
 
 #returns variable corresponding to cell i,j by extracting it from the var_array
 # 0-based indexing on inputs
@@ -98,12 +107,7 @@ def binary_ne_grid(cagey_grid):
     n, cages = cagey_grid
 
     cell_dom = range(1, n + 1)
-
-    var_array = []
-    for i in cell_dom:
-        for j in cell_dom:
-            var = Variable(f"Cell({i},{j})", cell_dom)
-            var_array.append(var)
+    var_array = build_var_array(cell_dom)
 
     csp = CSP("bne", var_array)
 
@@ -143,8 +147,39 @@ def binary_ne_grid(cagey_grid):
 
 
 def nary_ad_grid(cagey_grid):
-    ##IMPLEMENT
-    pass
+    n, cages = cagey_grid
+
+    cell_dom = range(1, n + 1)
+    var_array = build_var_array(cell_dom)
+
+    csp = CSP("naryne", var_array)
+
+    # all tuples x,y where x != y, 1-n
+    naryne_tuples = list(permutations(cell_dom, n))
+
+    #row ne
+    for row in range(n):
+        row_vars = []
+        for i in range(n):
+            v = get_cell_from_arr(row, i, n, var_array)
+            row_vars.append(v)
+
+        con = Constraint(f"Row {row+1} nary_ne", row_vars)
+        con.add_satisfying_tuples(naryne_tuples)
+        csp.add_constraint(con)
+
+    #col ne
+    for col in range(n):
+        col_vars = []
+        for i in range(n):
+            v = get_cell_from_arr(i, col, n, var_array)
+            col_vars.append(v)
+
+        con = Constraint(f"Col {col+1} nary_ne", col_vars)
+        con.add_satisfying_tuples(naryne_tuples)
+        csp.add_constraint(con)
+
+    return csp, var_array
 
 def cagey_csp_model(cagey_grid):
     ##IMPLEMENT
