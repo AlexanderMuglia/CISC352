@@ -84,14 +84,66 @@ An example of a 3x3 puzzle would be defined as:
 '''
 
 from cspbase import *
+from itertools import product
+
+#returns variable corresponding to cell i,j by extracting it from the var_array
+# 0-based indexing on inputs
+def get_cell_from_arr(row, col, n, var_array):
+    idx = n*row
+    idx += col
+    return var_array[idx]
+
 
 def binary_ne_grid(cagey_grid):
-    ##IMPLEMENT
-    pass
+    n, cages = cagey_grid
+
+    cell_dom = range(1, n + 1)
+
+    var_array = []
+    for i in cell_dom:
+        for j in cell_dom:
+            var = Variable(f"Cell({i},{j})", cell_dom)
+            var_array.append(var)
+
+    csp = CSP("bne", var_array)
+
+    # all tuples x,y where x != y, 1-n
+    bne_tuples = [[i, j] for (i, j) in product(range(1,n+1), repeat=2) if i != j]
+
+    #row bne
+    for row in range(n):
+        for i in range(n):
+            v1 = get_cell_from_arr(row, i, n, var_array)
+            for j in range(i+1, n):
+                v2 = get_cell_from_arr(row, j, n, var_array)
+
+                con1 = Constraint(f"noteq Cell({row+1},{i+1}), Cell({row+1},{j+1})", [v1, v2])
+                con1.add_satisfying_tuples(bne_tuples)
+                con2 = Constraint(f"noteq Cell({i+1},{row+1}), Cell({j+1},{row+1})", [v2, v1])
+                con2.add_satisfying_tuples(bne_tuples)
+
+                csp.add_constraint(con1)
+                csp.add_constraint(con2)
+
+    #col bne
+    for col in range(n):
+        for i in range(n):
+            v1 = get_cell_from_arr(i, col, n, var_array)
+            for j in range(i+1, n):
+                v2 = get_cell_from_arr(j, col, n, var_array)
+
+                con1 = Constraint(f"noteq Cell({i+1},{col+1}), Cell({j+1},{col+1})", [v1, v2])
+                con1.add_satisfying_tuples(bne_tuples)
+                con2 = Constraint(f"noteq Cell({col+1},{i+1}), Cell({col+1},{j+1})", [v2, v1])
+                con2.add_satisfying_tuples(bne_tuples)
+
+                csp.add_constraint(con1)
+                csp.add_constraint(con2)
+    return csp, var_array
 
 
 def nary_ad_grid(cagey_grid):
-    ## IMPLEMENT
+    ##IMPLEMENT
     pass
 
 def cagey_csp_model(cagey_grid):
