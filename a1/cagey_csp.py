@@ -102,6 +102,43 @@ def get_cell_from_arr(row, col, n, var_array):
     idx += col
     return var_array[idx]
 
+# used to find satisfying tuples for a cage. Takes target value goal,
+# operator op, and the number of variables that will be used, num_terms
+# and the n value from the puzzle
+def find_cage_tuples(goal, op, num_terms, n):
+    sat = set()
+    prod = list(product(range(1, n+1), repeat=num_terms))
+    allow = True
+
+    for tup in prod:
+        if tup not in sat:
+            res = tup[0]
+            if op == "+":
+                for x in tup[1:]:
+                    res += x
+            elif op == "-":
+                for x in tup[1:]:
+                    res -= x
+            elif op == "*":
+                for x in tup[1:]:
+                    res *= x
+            elif op == "/":
+                for x in tup[1:]:
+                    res /= x
+            else:
+                if num_terms > 1:
+                    allow = False
+
+            if res == goal and allow:
+                # if we find a set of numbers that work, we want to add the permutation
+                # of that set of numbers. This is to satisfy the fact that we can use
+                # these numbers in any order, despite the fact that the tuples will have
+                # an inherent ordering in them.
+                for p in permutations(tup, num_terms):
+                    sat.add(p)
+
+    return list(sat)
+
 
 def binary_ne_grid(cagey_grid):
     n, cages = cagey_grid
@@ -182,5 +219,32 @@ def nary_ad_grid(cagey_grid):
     return csp, var_array
 
 def cagey_csp_model(cagey_grid):
-    ##IMPLEMENT
-    pass
+    n, cages = cagey_grid
+    op_dom = ["+", "-", "*", "/", "?"]
+    # start with n-ary constraints
+    csp, var_array = nary_ad_grid(cagey_grid)
+
+    # just need to add cage constraints now
+    for cage in cages:
+        goal, cells, op = cage
+
+        cage_vars = []
+        for cell in cells:
+            x, y = cell
+            v = get_cell_from_arr(x-1, y-1, n, var_array)
+            cage_vars.append(v)
+
+        op_var = Variable(f"Cage_op({goal}:{op}:{cage_vars})", op_dom)
+        csp.add_var(op_var)
+        var_array.append(op_var)
+
+        # append on the operator to every sat tuple
+        sat_tuples = [list(x) + [op] for x in find_cage_tuples(goal, op, len(cage_vars), n)]
+        cage_vars.append(op_var)
+
+        con = Constraint(f"{cage}", cage_vars)
+        con.add_satisfying_tuples(sat_tuples)
+        csp.add_constraint(con)
+
+    cage_var = Variable(f"{cage}", [])
+    return csp, var_array
