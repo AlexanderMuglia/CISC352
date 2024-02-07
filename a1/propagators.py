@@ -9,7 +9,7 @@
 #
 
 
-'''This file will contain different constraint propagators to be used within
+"""This file will contain different constraint propagators to be used within
    bt_search.
 
    propagator == a function with the following template
@@ -66,14 +66,12 @@
          that have one unassigned variable left
 
          for gac we initialize the GAC queue with all constraints containing V.
-   '''
-
-from collections import defaultdict
+   """
 
 
 def prop_BT(csp, newVar=None):
-    '''Do plain backtracking propagation. That is, do no
-    propagation at all. Just check fully instantiated constraints'''
+    """Do plain backtracking propagation. That is, do no
+    propagation at all. Just check fully instantiated constraints"""
 
     if not newVar:
         return True, []
@@ -92,9 +90,9 @@ def prop_BT(csp, newVar=None):
 
 
 def prop_FC(csp, newVar=None):
-    '''Do forward checking. That is check constraints with
-       only one uninstantiated variable. Remember to keep
-       track of all pruned variable,value pairs and return '''
+    """Do forward checking. That is check constraints with
+    only one uninstantiated variable. Remember to keep
+    track of all pruned variable,value pairs and return"""
 
     status = False
     pruned = []
@@ -105,8 +103,7 @@ def prop_FC(csp, newVar=None):
         cons = csp.get_all_nary_cons(1)
     else:
         # get all cons with 1 unassigned var
-        cons = [x for x in csp.get_cons_with_var(
-            newVar) if x.get_n_unasgn() == 1]
+        cons = [x for x in csp.get_cons_with_var(newVar) if x.get_n_unasgn() == 1]
 
     for c in cons:
         var = c.get_unasgn_vars()[0]
@@ -129,9 +126,9 @@ def prop_FC(csp, newVar=None):
 
 
 def prop_GAC(csp, newVar=None):
-    '''Do GAC propagation. If newVar is None we do initial GAC enforce
-       processing all constraints. Otherwise we do GAC enforce with
-       constraints containing newVar on GAC Queue'''
+    """Do GAC propagation. If newVar is None we do initial GAC enforce
+    processing all constraints. Otherwise we do GAC enforce with
+    constraints containing newVar on GAC Queue"""
 
     status = False
     pruned = []
@@ -142,8 +139,7 @@ def prop_GAC(csp, newVar=None):
         cons = csp.get_all_cons()
     else:
         # Process constraints involving newVar
-        cons = [x for x in csp.get_cons_with_var(
-            newVar) if x.get_n_unasgn() > 0]
+        cons = [x for x in csp.get_cons_with_var(newVar) if x.get_n_unasgn() > 0]
 
     def dfs(c, partial_tuple, vars_queue) -> bool:
         # DFS search to find at least 1 solution

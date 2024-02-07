@@ -9,8 +9,7 @@
 #
 
 
-
-'''This file will contain different constraint propagators to be used within
+"""This file will contain different constraint propagators to be used within
    the propagators
 
 var_ordering == a function with the following template
@@ -23,10 +22,11 @@ var_ordering == a function with the following template
 
     var_ordering returns the next Variable to be assigned, as per the definition
     of the heuristic it implements.
-   '''
+   """
+
 
 def ord_dh(csp):
-    ''' return variables according to the Degree Heuristic '''
+    """return variables according to the Degree Heuristic"""
     vars = csp.get_all_unasgn_vars()
 
     ret = None
@@ -40,8 +40,9 @@ def ord_dh(csp):
 
     return ret
 
+
 def ord_mrv(csp):
-    ''' return variable according to the Minimum Remaining Values heuristic '''
+    """return variable according to the Minimum Remaining Values heuristic"""
     vars = csp.get_all_unasgn_vars()
 
     if len(vars) == 0:
@@ -57,4 +58,3 @@ def ord_mrv(csp):
             ret = var
 
     return ret
-

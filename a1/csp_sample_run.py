@@ -1,4 +1,3 @@
-
 # CISC 352
 # csp_sample_run.py
 # desc: provides a sample csp implementation of a simple math problem, the colouring of the australian graph, and
@@ -27,10 +26,11 @@ import itertools
  X = Y + Z
 """
 
-x = Variable('X', [1, 2, 3])
-y = Variable('Y', [1, 2, 3])
-z = Variable('Z', [1, 2, 3])
-w = Variable('W', [1, 2, 3, 4])
+x = Variable("X", [1, 2, 3])
+y = Variable("Y", [1, 2, 3])
+z = Variable("Z", [1, 2, 3])
+w = Variable("W", [1, 2, 3, 4])
+
 
 def w_eq_sum_x_y_z(wxyz):
     """
@@ -46,11 +46,11 @@ def w_eq_sum_x_y_z(wxyz):
     return w == x + y + z
 
 
-c1 = Constraint('C1', [x, y, z])
+c1 = Constraint("C1", [x, y, z])
 # c1 is constraint x == y + z. Below are all of the satisfying tuples
 c1.add_satisfying_tuples([[2, 1, 1], [3, 1, 2], [3, 2, 1]])
 
-c2 = Constraint('C2', [w, x, y, z])
+c2 = Constraint("C2", [w, x, y, z])
 # c2 is constraint w == x + y + z. Instead of writing down the satisfying
 # tuples we compute them
 
@@ -66,7 +66,7 @@ for t in itertools.product(*varDoms):
 
 c2.add_satisfying_tuples(sat_tuples)
 
-simpleCSP = CSP("SimpleEqs", [x,y,z,w])
+simpleCSP = CSP("SimpleEqs", [x, y, z, w])
 simpleCSP.add_constraint(c1)
 simpleCSP.add_constraint(c2)
 
@@ -125,6 +125,7 @@ def neighbors_not_equal(dom):
     """
     return [[o, x] for (o, x) in itertools.product(dom, repeat=2) if o != x]
 
+
 def add_edge(v_name1, v_name2, vert, sat_tuple):
     """
     takes two names for the vertices, a list referencing said vertices, and a list of satisfying colouration tuples
@@ -135,8 +136,8 @@ def add_edge(v_name1, v_name2, vert, sat_tuple):
     :param sat_tuple: list of satisfying tuples
     :return: returns a list containing the two constraints on a single edge. (V1, V2) & (V2, V1)
     """
-    con1 = Constraint(f'C({v_name1}, {v_name2})', [vert[0], vert[1]])
-    con2 = Constraint(f'C({v_name2}, {v_name1})', [vert[1], vert[0]])
+    con1 = Constraint(f"C({v_name1}, {v_name2})", [vert[0], vert[1]])
+    con2 = Constraint(f"C({v_name2}, {v_name1})", [vert[1], vert[0]])
     con1.add_satisfying_tuples(sat_tuple)
     con2.add_satisfying_tuples(sat_tuple)
     return [con1, con2]
@@ -148,7 +149,7 @@ def australiaPaint():
     :return: a csp object encapsulating this problem.
     """
     # define all variables/their domains
-    dom = ['R', 'G', 'B']  # red, green, blue respectively
+    dom = ["R", "G", "B"]  # red, green, blue respectively
 
     wa = Variable("Western Australia", dom)
     nt = Variable("Northern Territory", dom)
@@ -204,23 +205,24 @@ def solve_graph_color(propType, trace=False):
     solver = BT(csp)
     if trace:
         solver.trace_on()
-    if propType == 'BT':
+    if propType == "BT":
         solver.bt_search(prop_BT)
-    elif propType == 'FC':
+    elif propType == "FC":
         solver.bt_search(prop_FC)
-    elif propType == 'GAC':
+    elif propType == "GAC":
         solver.bt_search(prop_GAC)
+
 
 # ===============
 # Execution block
 # ===============
 trace = False
 print("Plain Backtracking on Colouring Australia")
-solve_graph_color('BT', trace)
+solve_graph_color("BT", trace)
 print("=========================================")
 trace = False
 print("Forward Checking on Colouring Australia")
-solve_graph_color('FC', trace)
+solve_graph_color("FC", trace)
 print("=========================================")
 
 
@@ -233,27 +235,29 @@ NxN can be quite challenging.
 There exists a valid arrangement of N queens for all N >= 4.
 """
 
+
 def queensCheck(qi, qj, i, j):
-    '''Return true if i and j can be assigned to the queen in row qi and row qj
-       respectively. Used to find satisfying tuples.
-    '''
-    return i != j and abs(i-j) != abs(qi-qj)
+    """Return true if i and j can be assigned to the queen in row qi and row qj
+    respectively. Used to find satisfying tuples.
+    """
+    return i != j and abs(i - j) != abs(qi - qj)
+
 
 def nQueens(n):
-    '''Return an n-queens CSP'''
+    """Return an n-queens CSP"""
     i = 0
     dom = []
     for i in range(n):
-        dom.append(i+1)
+        dom.append(i + 1)
 
     vars = []
     for i in dom:
-        vars.append(Variable('Q{}'.format(i), dom))
+        vars.append(Variable("Q{}".format(i), dom))
 
     cons = []
     for qi in range(len(dom)):
-        for qj in range(qi+1, len(dom)):
-            con = Constraint("C(Q{},Q{})".format(qi+1,qj+1),[vars[qi], vars[qj]])
+        for qj in range(qi + 1, len(dom)):
+            con = Constraint("C(Q{},Q{})".format(qi + 1, qj + 1), [vars[qi], vars[qj]])
             sat_tuples = []
             for t in itertools.product(dom, dom):
                 if queensCheck(qi, qj, t[0], t[1]):
@@ -266,26 +270,27 @@ def nQueens(n):
         csp.add_constraint(c)
     return csp
 
+
 def solve_nQueens(n, propType, trace=False):
     csp = nQueens(n)
     solver = BT(csp)
     if trace:
         solver.trace_on()
-    if propType == 'BT':
+    if propType == "BT":
         solver.bt_search(prop_BT)
-    elif propType == 'FC':
+    elif propType == "FC":
         solver.bt_search(prop_FC)
-    elif propType == 'GAC':
+    elif propType == "GAC":
         solver.bt_search(prop_GAC)
 
+
 trace = False
-#trace = False
+# trace = False
 print("Plain Bactracking on 8-queens")
-solve_nQueens(16, 'BT', trace)
+solve_nQueens(16, "BT", trace)
 print("=======================================================")
-#print("Forward Checking 8-queens")
-#solve_nQueens(8, 'FC', trace)
+# print("Forward Checking 8-queens")
+# solve_nQueens(8, 'FC', trace)
 print("=======================================================")
 print("GAC 8-queens")
-solve_nQueens(8, 'GAC', trace)
-
+solve_nQueens(8, "GAC", trace)
