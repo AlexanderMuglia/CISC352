@@ -86,15 +86,11 @@ def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailP
             return 1
         else:
             return 0
-
     if ghostPosition == jailPosition:
-        if noisyDistance is None:
-            return 1
-        else:
-            return 0
+        return 0
 
-    true_distance = manhattanDistance( pacmanPosition, ghostPosition )
-    return busters.getObservationProbability(noisyDistance, true_distance)
+    trueDistance = manhattanDistance(pacmanPosition, ghostPosition)
+    return busters.getObservationProbability(noisyDistance, trueDistance)
 
 
 
