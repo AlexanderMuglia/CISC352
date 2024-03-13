@@ -21,6 +21,7 @@ import busters
 def normalize(self):
     """
     Normalize the distribution such that the total value of all keys sums
+
     to 1. The ratio of values for all keys will remain the same. In the case
     where the total value of the distribution is 0, do nothing.
 
@@ -40,8 +41,12 @@ def normalize(self):
     >>> empty
     {}
     """
-    "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    t = self.total()
+
+    if t != 0:
+        for k in self.keys():
+            self[k] /= t
+
 
 def sample(self):
     """
@@ -64,8 +69,11 @@ def sample(self):
     >>> round(samples.count('d') * 1.0/N, 1)
     0.0
     """
-    "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    target = self.total() * random.random()
+    for k, v in self.items():
+        target -= v
+        if target <= 0:
+            return k
 
 
 def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailPosition):
