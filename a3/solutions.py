@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -13,11 +13,13 @@
 
 '''Implement the methods from the classes in inference.py here'''
 
-import util
-from util import raiseNotDefined, manhattanDistance
 import random
+
 import busters
-import time
+import inference
+import util
+from util import manhattanDistance, raiseNotDefined
+
 
 def normalize(self):
     """
@@ -94,7 +96,6 @@ def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailP
     return busters.getObservationProbability(noisyDistance, trueDistance)
 
 
-
 def observeUpdate(self, observation, gameState):
     """
     Update beliefs based on the distance observation and Pacman's position.
@@ -131,5 +132,17 @@ def elapseTime(self, gameState):
     Pacman's current position. However, this is not a problem, as Pacman's
     current position is known.
     """
-    "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+
+    newBeliefs = inference.DiscreteDistribution()
+
+    # Loop over possible ghost positions
+    for oldPos in self.allPositions:
+        # Calculate new distribution after 1 time tick
+        newPosDist = self.getPositionDistribution(gameState, oldPos)
+
+        # Update beliefs accordingly
+        for newPos, newWeight in newPosDist.items():
+            newBeliefs[newPos] += self.beliefs[oldPos] * newWeight
+
+    self.beliefs = newBeliefs
+    self.beliefs.normalize()
