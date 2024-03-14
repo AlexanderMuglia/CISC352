@@ -12,6 +12,8 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+from distanceCalculator import Distancer
+from game import Actions
 import util
 from game import Agent
 from game import Directions
@@ -19,29 +21,39 @@ from keyboardAgents import KeyboardAgent
 import inference
 import busters
 
+
 class NullGraphics:
     "Placeholder for graphics"
-    def initialize(self, state, isBlue = False):
+
+    def initialize(self, state, isBlue=False):
         pass
+
     def update(self, state):
         pass
+
     def pause(self):
         pass
+
     def draw(self, state):
         pass
+
     def updateDistributions(self, dist):
         pass
+
     def finish(self):
         pass
+
 
 class KeyboardInference(inference.InferenceModule):
     """
     Basic inference module for use with the keyboard.
     """
+
     def initializeUniformly(self, gameState):
         "Begin with a uniform distribution over ghost positions."
         self.beliefs = util.Counter()
-        for p in self.legalPositions: self.beliefs[p] = 1.0
+        for p in self.legalPositions:
+            self.beliefs[p] = 1.0
         self.beliefs.normalize()
 
     def observeUpdate(self, observation, gameState):
@@ -66,7 +78,7 @@ class KeyboardInference(inference.InferenceModule):
 class BustersAgent:
     "An agent that tracks and displays its beliefs about ghost positions."
 
-    def __init__( self, index = 0, inference = "ExactInference", ghostAgents = None, observeEnable = True, elapseTimeEnable = True):
+    def __init__(self, index=0, inference="ExactInference", ghostAgents=None, observeEnable=True, elapseTimeEnable=True):
         try:
             inferenceType = util.lookup(inference, globals())
         except Exception:
@@ -81,13 +93,15 @@ class BustersAgent:
         self.display = __main__._display
         for inference in self.inferenceModules:
             inference.initialize(gameState)
-        self.ghostBeliefs = [inf.getBeliefDistribution() for inf in self.inferenceModules]
+        self.ghostBeliefs = [inf.getBeliefDistribution()
+                             for inf in self.inferenceModules]
         self.firstMove = True
 
     def observationFunction(self, gameState):
         "Removes the ghost states from the gameState"
         agents = gameState.data.agentStates
-        gameState.data.agentStates = [agents[0]] + [None for i in range(1, len(agents))]
+        gameState.data.agentStates = [agents[0]] + \
+            [None for i in range(1, len(agents))]
         return gameState
 
     def getAction(self, gameState):
@@ -106,10 +120,11 @@ class BustersAgent:
         "By default, a BustersAgent just stops.  This should be overridden."
         return Directions.STOP
 
+
 class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     "An agent controlled by the keyboard that displays beliefs about ghost positions."
 
-    def __init__(self, index = 0, inference = "KeyboardInference", ghostAgents = None):
+    def __init__(self, index=0, inference="KeyboardInference", ghostAgents=None):
         KeyboardAgent.__init__(self, index)
         BustersAgent.__init__(self, index, inference, ghostAgents)
 
@@ -119,9 +134,6 @@ class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     def chooseAction(self, gameState):
         return KeyboardAgent.getAction(self, gameState)
 
-from distanceCalculator import Distancer
-from game import Actions
-from game import Directions
 
 class GreedyBustersAgent(BustersAgent):
     "An agent that charges the closest ghost."
@@ -141,12 +153,24 @@ class GreedyBustersAgent(BustersAgent):
         legal = [a for a in gameState.getLegalPacmanActions()]
         livingGhosts = gameState.getLivingGhosts()
         livingGhostPositionDistributions = \
-            [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
-             if livingGhosts[i+1]]
+            [beliefs for i, beliefs in enumerate(
+                self.ghostBeliefs) if livingGhosts[i+1]]
 
+        # list of each ghost's position with the greatest weight
+        mostLikelyLivingGhostPositions = \
+            [max(ghostBelief.keys(),
+                 key=ghostBelief.get)
+             for ghostBelief in livingGhostPositionDistributions]
 
+        # closest ghost to pacman's position
+        closestGhost = \
+            min(mostLikelyLivingGhostPositions,
+                key=lambda l: self.distancer.getDistance(l, pacmanPosition))
 
+        # best move to minimize the resulting distance to the closest ghost
+        bestMove = \
+            min(legal,
+                key=lambda l: self.distancer.getDistance(closestGhost,
+                                                         Actions.getSuccessor(pacmanPosition, l)))
 
-        "*** YOUR CODE HERE ***"
-
-
+        return bestMove
