@@ -17,6 +17,7 @@ import util
 from util import raiseNotDefined, manhattanDistance
 import random
 import busters
+import time
 
 def normalize(self):
     """
@@ -109,8 +110,15 @@ def observeUpdate(self, observation, gameState):
     current position. However, this is not a problem, as Pacman's current
     position is known.
     """
-    "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    pacmanPos = gameState.getPacmanPosition()
+    jailPos = self.getJailPosition()
+    for pos in self.allPositions:
+        p = self.getObservationProb(observation, pacmanPos, pos, jailPos)
+        if p == 1:
+            self.beliefs[pos] = p
+        else:
+            self.beliefs[pos] *= p
+
     self.beliefs.normalize()
 
 
