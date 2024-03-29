@@ -1,5 +1,6 @@
 import nn
 
+
 class PerceptronModel(object):
     def __init__(self, dim):
         """
@@ -26,7 +27,7 @@ class PerceptronModel(object):
             x_point: a node with shape (1 x dimensions)
         Returns: a node containing a single number (the score)
         """
-        "*** YOUR CODE HERE ***"
+        return nn.DotProduct(self.w, x_point)
 
     def get_prediction(self, x_point):
         """
@@ -34,13 +35,23 @@ class PerceptronModel(object):
 
         Returns: -1 or 1
         """
-        "*** YOUR CODE HERE ***"
+        return -1 if nn.as_scalar(self.run(x_point)) < 0 else 1
 
     def train_model(self, dataset):
         """
         Train the perceptron until convergence.
         """
-        "*** YOUR CODE HERE ***"
+        missed = 1
+        while missed > 0:
+            missed = 0
+            for x, y in dataset.iterate_once(1):
+                predicted = self.get_prediction(x)
+                expected = nn.as_scalar(y)
+
+                if predicted != expected:
+                    self.w.update(expected, x)
+                    missed += 1
+
 
 class RegressionModel(object):
     """
@@ -48,6 +59,7 @@ class RegressionModel(object):
     numbers to real numbers. The network should be sufficiently large to be able
     to approximate sin(x) on the interval [-2pi, 2pi] to reasonable precision.
     """
+
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
@@ -81,6 +93,7 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
 
+
 class DigitClassificationModel(object):
     """
     A model for handwritten digit classification using the MNIST dataset.
@@ -95,6 +108,7 @@ class DigitClassificationModel(object):
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
     """
+
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
@@ -135,4 +149,3 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-
