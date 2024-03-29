@@ -62,13 +62,16 @@ class RegressionModel(object):
 
     def __init__(self):
         # Initialize your model parameters here
-        self.learning_rate = 0.01  # minimum allowed (0.001, 1.0)
-        self.batch_size = 10  # must divide dataset evenly (dataset is 200?)
+        # why negative???
+        self.learning_rate = -0.001  # minimum allowed (0.001, 1.0)
+        self.batch_size = 50  # must divide dataset evenly (dataset is 200?)
 
         # first layer starts with 1
         # last layer ends with 1
-        self.w1 = nn.Parameter(1, 1)  # (input size, layer size)
-        self.b1 = nn.Parameter(1, 1)  # (same as weight)
+        self.w1 = nn.Parameter(1, 50)  # (input size, output size)
+        self.b1 = nn.Parameter(1, 50)  # (1, same as weight)
+        self.w2 = nn.Parameter(50, 1)  # (input size, output size)
+        self.b2 = nn.Parameter(1, 1)   # (1, same as weight)
 
     def run(self, x):
         """
@@ -79,7 +82,9 @@ class RegressionModel(object):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
-        return nn.AddBias(nn.Linear(x, self.w1), self.b1)
+        l1 = nn.AddBias(nn.Linear(x, self.w1), self.b1)
+        l2 = nn.AddBias(nn.Linear(l1, self.w2), self.b2)
+        return l2
 
     def get_loss(self, x, y):
         """
@@ -105,9 +110,12 @@ class RegressionModel(object):
                 cur_loss = nn.as_scalar(loss)
 
                 # Updates weights from gradients
-                [w1_grad, b1_grad] = nn.gradients([self.w1, self.b1], loss)
+                [w1_grad, b1_grad, w2_grad, b2_grad] = nn.gradients(
+                    [self.w1, self.b1, self.w2, self.b2], loss)
                 self.w1.update(self.learning_rate, w1_grad)
                 self.b1.update(self.learning_rate, b1_grad)
+                self.w2.update(self.learning_rate, w2_grad)
+                self.b2.update(self.learning_rate, b2_grad)
 
 
 class DigitClassificationModel(object):
