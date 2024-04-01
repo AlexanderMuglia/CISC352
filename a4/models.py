@@ -142,17 +142,21 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         # why negative???
-        self.learning_rate = -0.050  # minimum allowed (0.001, 1.0)
+        self.learning_rate = -0.069  # minimum allowed (0.001, 1.0)
         self.batch_size = 50
 
         # first layer starts with 1
         # last layer ends with 1
-        self.w1 = nn.Parameter(784, 20)  # (input size, output size)
-        self.b1 = nn.Parameter(1, 20)  # (1, same as weight)
-        self.w2 = nn.Parameter(20, 100)  # (input size, output size)
-        self.b2 = nn.Parameter(1, 100)   # (1, same as weight)
-        self.w3 = nn.Parameter(100, 10)  # (input size, output size)
-        self.b3 = nn.Parameter(1, 10)   # (1, same as weight)
+        self.w1 = nn.Parameter(784, 64)  # (input size, output size)
+        self.b1 = nn.Parameter(1, 64)  # (1, same as weight)
+        self.w2 = nn.Parameter(64, 64)  # (input size, output size)
+        self.b2 = nn.Parameter(1, 64)   # (1, same as weight)
+        self.w3 = nn.Parameter(64, 64)  # (input size, output size)
+        self.b3 = nn.Parameter(1, 64)   # (1, same as weight)
+        self.w4 = nn.Parameter(64, 64)  # (input size, output size)
+        self.b4 = nn.Parameter(1, 64)   # (1, same as weight)
+        self.w5 = nn.Parameter(64, 10)  # (input size, output size)
+        self.b5 = nn.Parameter(1, 10)   # (1, same as weight)
 
     def run(self, x):
         """
@@ -170,8 +174,10 @@ class DigitClassificationModel(object):
         """
         l1 = nn.ReLU(nn.AddBias(nn.Linear(x, self.w1), self.b1))
         l2 = nn.ReLU(nn.AddBias(nn.Linear(l1, self.w2), self.b2))
-        l3 = nn.AddBias(nn.Linear(l2, self.w3), self.b3)
-        return l3
+        l3 = nn.ReLU(nn.AddBias(nn.Linear(l2, self.w3), self.b3))
+        l4 = nn.ReLU(nn.AddBias(nn.Linear(l3, self.w4), self.b4))
+        l5 = nn.AddBias(nn.Linear(l4, self.w5), self.b5)
+        return l5
 
     def get_loss(self, x, y):
         """
@@ -202,11 +208,15 @@ class DigitClassificationModel(object):
             cur_loss = nn.as_scalar(loss)
 
             # Updates weights from gradients
-            [w1_grad, b1_grad, w2_grad, b2_grad, w3_grad, b3_grad] = nn.gradients(
-                [self.w1, self.b1, self.w2, self.b2, self.w3, self.b3], loss)
+            [w1_grad, b1_grad, w2_grad, b2_grad, w3_grad, b3_grad, w4_grad, b4_grad, w5_grad, b5_grad] = nn.gradients(
+                [self.w1, self.b1, self.w2, self.b2, self.w3, self.b3, self.w4, self.b4, self.w5, self.b5], loss)
             self.w1.update(self.learning_rate, w1_grad)
             self.b1.update(self.learning_rate, b1_grad)
             self.w2.update(self.learning_rate, w2_grad)
             self.b2.update(self.learning_rate, b2_grad)
             self.w3.update(self.learning_rate, w3_grad)
             self.b3.update(self.learning_rate, b3_grad)
+            self.w4.update(self.learning_rate, w4_grad)
+            self.b4.update(self.learning_rate, b4_grad)
+            self.w5.update(self.learning_rate, w5_grad)
+            self.b5.update(self.learning_rate, b5_grad)
