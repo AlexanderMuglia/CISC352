@@ -142,8 +142,8 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         # why negative???
-        self.learning_rate = -0.069  # minimum allowed (0.001, 1.0)
-        self.batch_size = 50
+        self.learning_rate = -0.05  # minimum allowed (0.001, 1.0)
+        self.batch_size = 32
 
         # first layer starts with 1
         # last layer ends with 1
